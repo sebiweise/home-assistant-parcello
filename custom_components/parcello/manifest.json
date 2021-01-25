@@ -1,0 +1,10 @@
+{
+    "domain": "parcello",
+    "name": "Parcello",
+    "documentation": "https://github.com/sebiweise/Home-Assistant-Parcello",
+    "issue_tracker": "https://github.com/sebiweise/Home-Assistant-Parcello/issues",
+    "config_flow": true,
+    "dependencies": [],
+    "codeowners": ["@sebiweise"],
+    "requirements": []
+}
