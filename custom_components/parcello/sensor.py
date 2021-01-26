@@ -106,7 +106,7 @@ class PackagesSensor(Entity):
 async def get_data(url):
     """ Get data from url """
 
-    url = [API_BASEURL] + url
+    url = f"{const.API_BASEURL}{url}"
 
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
