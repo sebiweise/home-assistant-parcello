@@ -1,0 +1,35 @@
+{
+    "config": {
+        "abort": {
+            "single_instance_allowed": "Es ist nur eine einzige Konfiguration von Mail und Paketen zulässig."
+        },
+        "error": {
+            "auth": "Das hat leider nicht funktioniert."
+        },
+        "step": {
+            "user": {
+                "data": {
+                    "password": "Passwort",
+                    "username": "Nutzername/Email"
+                },
+                "description": "Bitte geben Sie die Anmeldedaten Ihres Parcello-Kontos ein.",
+                "title": "Parcello"
+            }
+        }
+    },
+    "options": {
+        "error": {
+            "auth": "Das hat leider nicht funktioniert."
+        },
+        "step": {
+            "init": {
+                "data": {
+                    "password": "Passwort",
+                    "username": "Nutzername/Email"
+                },
+                "description": "Bitte geben Sie die Anmeldedaten Ihres Parcello-Kontos ein.",
+                "title": "Parcello"
+            }
+        }
+    }
+}
