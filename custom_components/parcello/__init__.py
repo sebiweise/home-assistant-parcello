@@ -1,11 +1,24 @@
 """Parcello Integration"""
-
-from .const import DOMAIN, VERSION, ISSUE_URL, PLATFORM
+import asyncio
 import logging
 
+from homeassistant.core import callback
+
+# The domain of your component. Should be equal to the name of your component.
+DOMAIN = "parcello"
 _LOGGER = logging.getLogger(__name__)
 
-async def async_setup(hass, config_entry):
-    """ Disallow configuration via YAML """
 
+@asyncio.coroutine
+def async_setup(hass, config):
+    """Set up the an async service example component."""
+    @callback
+    def my_service(call):
+        """My first service."""
+        _LOGGER.info('Received data', call.data)
+
+    # Register our service with Home Assistant.
+    hass.services.async_register(DOMAIN, 'demo', my_service)
+
+    # Return boolean to indicate that initialization was successfully.
     return True
