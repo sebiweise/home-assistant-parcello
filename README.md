@@ -6,6 +6,8 @@
 ![GitHub commit activity](https://img.shields.io/github/commit-activity/m/sebiweise/Home-Assistant-Parcello)
 ![GitHub last commit](https://img.shields.io/github/last-commit/sebiweise/Home-Assistant-Parcello)
 
+[![CodeFactor](https://www.codefactor.io/repository/github/sebiweise/home-assistant-parcello/badge)](https://www.codefactor.io/repository/github/sebiweise/home-assistant-parcello)
+
 ## About Parcello integration
 
 ## Credits:
