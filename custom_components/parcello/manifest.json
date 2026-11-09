@@ -1,6 +1,7 @@
 {
   "domain": "parcello",
   "name": "Parcello",
+  "categories": ["productivity_information.shopping_groceries"],
   "codeowners": ["@sebiweise"],
   "config_flow": true,
   "documentation": "https://github.com/sebiweise/home-assistant-parcello",
@@ -8,5 +9,5 @@
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/sebiweise/home-assistant-parcello/issues",
   "requirements": [],
-  "version": "0.1.0"
+  "version": "0.1.1"
 }
