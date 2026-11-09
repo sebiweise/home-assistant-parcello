@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Parcello
+    url: https://www.parcello.org
+    about: Fragen zur Parcello-App und zu deinem Konto beantwortet Parcello, nicht dieses Projekt.
+  - name: Home Assistant Community
+    url: https://community.home-assistant.io/
+    about: Allgemeine Fragen zu Home Assistant und Automationen.

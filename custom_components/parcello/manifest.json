@@ -1,10 +1,12 @@
 {
-    "domain": "parcello",
-    "name": "Parcello",
-    "documentation": "https://github.com/sebiweise/Home-Assistant-Parcello",
-    "issue_tracker": "https://github.com/sebiweise/Home-Assistant-Parcello/issues",
-    "config_flow": true,
-    "dependencies": [],
-    "codeowners": ["@sebiweise"],
-    "requirements": []
+  "domain": "parcello",
+  "name": "Parcello",
+  "codeowners": ["@sebiweise"],
+  "config_flow": true,
+  "documentation": "https://github.com/sebiweise/home-assistant-parcello",
+  "integration_type": "service",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/sebiweise/home-assistant-parcello/issues",
+  "requirements": [],
+  "version": "0.1.0"
 }

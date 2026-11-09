@@ -1,0 +1,27 @@
+name: Funktionswunsch / Feature request
+description: Schlage eine neue Funktion oder Verbesserung vor.
+labels: ["enhancement"]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Welches Problem soll gelöst werden?
+      description: Beschreibe den Anwendungsfall, z. B. „Wenn ein Paket in Zustellung ist, möchte ich …“.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Gewünschte Lösung
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternativen
+      description: Hast du bereits andere Lösungen oder Workarounds ausprobiert?
+  - type: textarea
+    id: app
+    attributes:
+      label: Parcello-App
+      description: Kann die Parcello-App das schon? Dann beschreibe, wo du es dort findest.

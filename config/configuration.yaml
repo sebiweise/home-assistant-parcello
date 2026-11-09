@@ -1,0 +1,7 @@
+# Configuration for local development (scripts/develop)
+default_config:
+
+logger:
+  default: info
+  logs:
+    custom_components.parcello: debug

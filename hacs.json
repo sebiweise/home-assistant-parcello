@@ -1,5 +1,4 @@
 {
-    "name": "Parcello",
-    "domains": [ "sensor" ],
-    "render_readme": true
-  }
+  "name": "Parcello",
+  "homeassistant": "2024.12.0"
+}

@@ -1,157 +1,199 @@
-"""Adds config flow for Parcello."""
+"""Config flow for the Parcello integration."""
 
-from collections import OrderedDict
-import homeassistant.helpers.config_validation as cv
-from homeassistant.core import callback
-from homeassistant import config_entries
-from .const import (
-    CONF_SCAN_INTERVAL,
-    DOMAIN,
-    DEFAULT_SCAN_INTERVAL,
-    API_BASEURL,
-)
-from homeassistant.const import (
-    CONF_PASSWORD,
-    CONF_USERNAME,
-)
+from __future__ import annotations
+
+from collections.abc import Mapping
 import logging
-import base64
-import aiohttp
-import json
+from typing import Any
+
 import voluptuous as vol
+
+from homeassistant.config_entries import (
+    ConfigEntry,
+    ConfigFlow,
+    ConfigFlowResult,
+    OptionsFlow,
+)
+from homeassistant.const import CONF_EMAIL, CONF_PASSWORD
+from homeassistant.core import callback
+from homeassistant.helpers import selector
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+
+from .api import (
+    ParcelloApiClient,
+    ParcelloApiError,
+    ParcelloAuthError,
+    ParcelloCredentials,
+)
+from .const import (
+    CONF_DELIVERED_DAYS,
+    CONF_SCAN_INTERVAL,
+    CONF_TOKEN,
+    CONF_USER_ID,
+    DEFAULT_DELIVERED_DAYS,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    MAX_DELIVERED_DAYS,
+    MAX_SCAN_INTERVAL,
+    MIN_SCAN_INTERVAL,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
-ATTR_USERNAME = "username"
-ATTR_PASSWORD = "password"
-ATTR_SCAN_INTERVAL = "scan_interval"
+EMAIL_SELECTOR = selector.TextSelector(
+    selector.TextSelectorConfig(
+        type=selector.TextSelectorType.EMAIL, autocomplete="username"
+    )
+)
+PASSWORD_SELECTOR = selector.TextSelector(
+    selector.TextSelectorConfig(
+        type=selector.TextSelectorType.PASSWORD, autocomplete="current-password"
+    )
+)
+SCAN_INTERVAL_SELECTOR = selector.NumberSelector(
+    selector.NumberSelectorConfig(
+        min=MIN_SCAN_INTERVAL,
+        max=MAX_SCAN_INTERVAL,
+        step=1,
+        unit_of_measurement="min",
+        mode=selector.NumberSelectorMode.BOX,
+    )
+)
+DELIVERED_DAYS_SELECTOR = selector.NumberSelector(
+    selector.NumberSelectorConfig(
+        min=0,
+        max=MAX_DELIVERED_DAYS,
+        step=1,
+        unit_of_measurement="d",
+        mode=selector.NumberSelectorMode.BOX,
+    )
+)
 
-async def _login(user, pwd):
-    """function used to login"""
 
-    url = f"{API_BASEURL}/login/mail/{_encode_cred(user, pwd)}"
+class ParcelloConfigFlow(ConfigFlow, domain=DOMAIN):
+    """Handle a config flow for Parcello."""
 
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url) as resp:
-            if resp.status != 200:
-                _LOGGER.error("Http GET error: %s", resp.status)
-                return None
-
-            data_byte = await resp.read()
-            data = json.loads(data_byte.decode('utf-8'))
-            _LOGGER.debug("Authentication successfully")
-            return data
-
-def _encode_cred(user, pwd):
-    auth_str = f"{user}:{pwd}"
-    auth_bytes = auth_str.encode("utf-8")
-    auth = base64.b64encode(auth_bytes)
-    
-    return auth
-
-class ParcelloFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
     VERSION = 1
-    CONNECTION_CLASS = config_entries.CONN_CLASS_CLOUD_POLL
 
-    def __init__(self):
-        """Initialize."""
-        self._data = {}
-        self._errors = {}
-        
-    async def async_step_user(self, user_input={}):
-        """Handle a flow initialized by the user."""
-        self._errors = {}
-
-        if user_input is not None:
-            self._data.update(user_input)
-            resp = await _login(
-                user_input[CONF_USERNAME],
-                user_input[CONF_PASSWORD],
+    async def _async_login(
+        self, email: str, password: str, errors: dict[str, str]
+    ) -> ParcelloCredentials | None:
+        """Log in, filling errors on failure."""
+        try:
+            return await ParcelloApiClient.async_login(
+                async_get_clientsession(self.hass), email, password
             )
-            if resp is not None:
-                return self.async_create_entry(
-                    title=self._data[CONF_USERNAME],
-                    data={
-                        "auth": _encode_cred(user_input[CONF_USERNAME], user_input[CONF_PASSWORD]),
-                        "apiKey": resp["apiKey"],
-                        "userid": resp["userid"]
-                    }
-                )
-            else:
-                self._errors["base"] = "communication"
+        except ParcelloAuthError:
+            errors["base"] = "invalid_auth"
+        except ParcelloApiError as err:
+            _LOGGER.warning("Login at Parcello failed: %s", err)
+            errors["base"] = "cannot_connect"
+        return None
 
-            return await self._show_config_form(user_input)
-
-        return await self._show_config_form(user_input)
-
-    async def _show_config_form(self, user_input):
-        """Show the configuration form to edit location data."""
-
-        # Defaults
-        username = ""
-        password = ""
-
+    async def async_step_user(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Handle the initial step."""
+        errors: dict[str, str] = {}
         if user_input is not None:
-            if ATTR_USERNAME in user_input:
-                username = user_input[ATTR_USERNAME]
-            if ATTR_PASSWORD in user_input:
-                password = user_input[ATTR_PASSWORD]
+            email = user_input[CONF_EMAIL].strip()
+            credentials = await self._async_login(
+                email, user_input[CONF_PASSWORD], errors
+            )
+            if credentials is not None:
+                await self.async_set_unique_id(credentials.user_id)
+                self._abort_if_unique_id_configured()
+                return self.async_create_entry(
+                    title=email,
+                    data={
+                        CONF_EMAIL: email,
+                        CONF_USER_ID: credentials.user_id,
+                        CONF_TOKEN: credentials.token,
+                    },
+                )
 
-        data_schema = OrderedDict()
-        data_schema[vol.Required(ATTR_USERNAME, default=username)] = str
-        data_schema[vol.Required(ATTR_PASSWORD, default=password)] = str
         return self.async_show_form(
-            step_id="user", data_schema=vol.Schema(data_schema), errors=self._errors
+            step_id="user",
+            data_schema=self.add_suggested_values_to_schema(
+                vol.Schema(
+                    {
+                        vol.Required(CONF_EMAIL): EMAIL_SELECTOR,
+                        vol.Required(CONF_PASSWORD): PASSWORD_SELECTOR,
+                    }
+                ),
+                {CONF_EMAIL: (user_input or {}).get(CONF_EMAIL)},
+            ),
+            errors=errors,
         )
-    
+
+    async def async_step_reauth(
+        self, entry_data: Mapping[str, Any]
+    ) -> ConfigFlowResult:
+        """Handle a rejected token."""
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Log in again with the password."""
+        entry = self._get_reauth_entry()
+        email = entry.data[CONF_EMAIL]
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            credentials = await self._async_login(
+                email, user_input[CONF_PASSWORD], errors
+            )
+            if credentials is not None:
+                await self.async_set_unique_id(credentials.user_id)
+                self._abort_if_unique_id_mismatch(reason="wrong_account")
+                return self.async_update_reload_and_abort(
+                    entry, data_updates={CONF_TOKEN: credentials.token}
+                )
+
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            data_schema=vol.Schema({vol.Required(CONF_PASSWORD): PASSWORD_SELECTOR}),
+            description_placeholders={"email": email},
+            errors=errors,
+        )
+
     @staticmethod
     @callback
-    def async_get_options_flow(config_entry):
-        return ParcelloOptionsFlow(config_entry)
-    
-class ParcelloOptionsFlow(config_entries.OptionsFlow):
-    """Options flow for Parcello."""
+    def async_get_options_flow(config_entry: ConfigEntry) -> OptionsFlow:
+        """Return the options flow."""
+        return ParcelloOptionsFlow()
 
-    def __init__(self, config_entry):
-        """Initialize."""
-        self.config = config_entry
-        self._data = dict(config_entry.options)
-        self._errors = {}
-    
-    async def async_step_init(self, user_input=None):
-        """Parcello options."""
+
+class ParcelloOptionsFlow(OptionsFlow):
+    """Handle Parcello options."""
+
+    async def async_step_init(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Manage the options."""
         if user_input is not None:
-            self._data.update(user_input)
-
-            resp = await _login(
-                user_input[CONF_USERNAME],
-                user_input[CONF_PASSWORD],
+            return self.async_create_entry(
+                data={
+                    CONF_SCAN_INTERVAL: int(user_input[CONF_SCAN_INTERVAL]),
+                    CONF_DELIVERED_DAYS: int(user_input[CONF_DELIVERED_DAYS]),
+                }
             )
-            if resp is not None:
-                return await self.async_step_options_2()
-            else:
-                self._errors["base"] = "communication"
 
-            return await self._show_options_form(user_input)
-
-        return await self._show_options_form(user_input)
-    
-    async def _show_options_form(self, user_input):
-        """Show the configuration form to edit location data."""
-
-        # Defaults
-        username = self.config.options.get(CONF_USERNAME)
-        password = self.config.options.get(CONF_PASSWORD)
-
-        if user_input is not None:
-            if ATTR_USERNAME in user_input:
-                username = user_input[ATTR_USERNAME]
-            if ATTR_PASSWORD in user_input:
-                password = user_input[ATTR_PASSWORD]
-
-        data_schema = OrderedDict()
-        data_schema[vol.Required(ATTR_USERNAME, default=username)] = str
-        data_schema[vol.Required(ATTR_PASSWORD, default=password)] = str
+        options = self.config_entry.options
         return self.async_show_form(
-            step_id="init", data_schema=vol.Schema(data_schema), errors=self._errors
+            step_id="init",
+            data_schema=vol.Schema(
+                {
+                    vol.Required(
+                        CONF_SCAN_INTERVAL,
+                        default=options.get(CONF_SCAN_INTERVAL, DEFAULT_SCAN_INTERVAL),
+                    ): SCAN_INTERVAL_SELECTOR,
+                    vol.Required(
+                        CONF_DELIVERED_DAYS,
+                        default=options.get(
+                            CONF_DELIVERED_DAYS, DEFAULT_DELIVERED_DAYS
+                        ),
+                    ): DELIVERED_DAYS_SELECTOR,
+                }
+            ),
         )
