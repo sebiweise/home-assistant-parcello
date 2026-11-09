@@ -1,0 +1,72 @@
+name: Release
+
+# Creates a GitHub release (tag v<version> + parcello.zip) whenever the version
+# in manifest.json changes on master and no release for it exists yet.
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - custom_components/parcello/manifest.json
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Create release
+    # Manual runs on other branches must not publish unmerged code.
+    if: github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Read version
+        id: version
+        run: |
+          version="$(jq -r .version custom_components/parcello/manifest.json)"
+          # SemVer 2.0.0: no leading zeros in numeric identifiers, no empty
+          # identifiers in the pre-release or build metadata.
+          num='(0|[1-9][0-9]*)'
+          pre="($num|[0-9]*[A-Za-z-][0-9A-Za-z-]*)"
+          semver="^$num\.$num\.$num(-$pre(\.$pre)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?\$"
+          if ! [[ "$version" =~ $semver ]]; then
+            echo "Version in manifest.json is not SemVer" >&2
+            exit 1
+          fi
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+
+      - name: Check for existing release
+        id: exists
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Build zip
+        if: steps.exists.outputs.exists == 'false'
+        run: |
+          cd custom_components/parcello
+          zip -r "$GITHUB_WORKSPACE/parcello.zip" . -x "__pycache__/*"
+
+      - name: Create GitHub release
+        if: steps.exists.outputs.exists == 'false'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          gh release create "$TAG" parcello.zip \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --generate-notes

@@ -1,35 +1,212 @@
 {
-    "config": {
-        "abort": {
-            "single_instance_allowed": "Es ist nur eine einzige Konfiguration von Mail und Paketen zulässig."
-        },
-        "error": {
-            "auth": "Das hat leider nicht funktioniert."
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "password": "Passwort",
-                    "username": "Nutzername/Email"
-                },
-                "description": "Bitte geben Sie die Anmeldedaten Ihres Parcello-Kontos ein.",
-                "title": "Parcello"
-            }
+  "config": {
+    "step": {
+      "user": {
+        "title": "Parcello einrichten",
+        "description": "Melde dich mit der E-Mail-Adresse und dem Passwort deines Parcello-Kontos an. Die Anmeldung mit Apple oder Facebook wird nicht unterstützt.",
+        "data": {
+          "email": "E-Mail",
+          "password": "Passwort"
         }
+      },
+      "reauth_confirm": {
+        "title": "Erneut bei Parcello anmelden",
+        "description": "Parcello hat die Anmeldung von {email} abgelehnt. Gib das Passwort erneut ein.",
+        "data": {
+          "password": "Passwort"
+        }
+      }
     },
-    "options": {
-        "error": {
-            "auth": "Das hat leider nicht funktioniert."
-        },
-        "step": {
-            "init": {
-                "data": {
-                    "password": "Passwort",
-                    "username": "Nutzername/Email"
-                },
-                "description": "Bitte geben Sie die Anmeldedaten Ihres Parcello-Kontos ein.",
-                "title": "Parcello"
-            }
-        }
+    "error": {
+      "invalid_auth": "E-Mail-Adresse oder Passwort falsch.",
+      "cannot_connect": "Parcello ist nicht erreichbar. Versuche es später erneut."
+    },
+    "abort": {
+      "already_configured": "Dieses Parcello-Konto ist bereits eingerichtet.",
+      "reauth_successful": "Erneut angemeldet.",
+      "wrong_account": "Das ist ein anderes Parcello-Konto."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Parcello-Optionen",
+        "data": {
+          "scan_interval": "Aktualisierungsintervall",
+          "delivered_days": "Zugestellte Sendungen behalten"
+        },
+        "data_description": {
+          "scan_interval": "Minuten zwischen zwei Aktualisierungen. Parcello fragt die Sendungen selbst bei den Paketdiensten ab, ein kürzeres Intervall bringt also keine aktuelleren Daten.",
+          "delivered_days": "So viele Tage nach dem letzten Sendungsereignis behält eine zugestellte Sendung ihren Sensor (0 = sofort entfernen). In der Parcello-App bleibt die Sendung, bis du sie dort löschst."
+        }
+      }
+    }
+  },
+  "entity": {
+    "calendar": {
+      "deliveries": {
+        "name": "Zustellungen"
+      }
+    },
+    "sensor": {
+      "expected_parcels": {
+        "name": "Erwartete Sendungen",
+        "unit_of_measurement": "Sendungen",
+        "state_attributes": {
+          "parcels": {
+            "name": "Sendungen"
+          }
+        }
+      },
+      "out_for_delivery": {
+        "name": "In Zustellung",
+        "unit_of_measurement": "Sendungen",
+        "state_attributes": {
+          "parcels": {
+            "name": "Sendungen"
+          }
+        }
+      },
+      "next_delivery": {
+        "name": "Nächste Zustellung",
+        "state_attributes": {
+          "name": {
+            "name": "Name"
+          },
+          "tracking_id": {
+            "name": "Sendungsnummer"
+          },
+          "carrier": {
+            "name": "Paketdienst"
+          },
+          "status": {
+            "name": "Status"
+          },
+          "delivery_start": {
+            "name": "Zustellung ab"
+          },
+          "delivery_end": {
+            "name": "Zustellung bis"
+          }
+        }
+      },
+      "parcel": {
+        "name": "Sendung",
+        "state": {
+          "delivered": "Zugestellt",
+          "in_transit": "Unterwegs",
+          "out_for_delivery": "In Zustellung",
+          "warning": "Verzögert",
+          "problem": "Problem",
+          "loading": "Wird aktualisiert",
+          "missing_info": "Angaben fehlen",
+          "no_address": "Adresse fehlt",
+          "no_data_yet": "Noch keine Daten",
+          "returned": "Rücksendung"
+        },
+        "state_attributes": {
+          "parcel_id": {
+            "name": "Sendungs-ID"
+          },
+          "tracking_id": {
+            "name": "Sendungsnummer"
+          },
+          "carrier": {
+            "name": "Paketdienst"
+          },
+          "outgoing": {
+            "name": "Ausgehend"
+          },
+          "pickup": {
+            "name": "Abholung"
+          },
+          "rescheduled": {
+            "name": "Verschoben"
+          },
+          "delivery_start": {
+            "name": "Zustellung ab"
+          },
+          "delivery_end": {
+            "name": "Zustellung bis"
+          },
+          "last_event": {
+            "name": "Letztes Ereignis"
+          },
+          "last_event_time": {
+            "name": "Letztes Ereignis am"
+          },
+          "last_event_location": {
+            "name": "Ort des letzten Ereignisses"
+          },
+          "last_event_code": {
+            "name": "Code des letzten Ereignisses"
+          },
+          "tracking_url": {
+            "name": "Sendungsverfolgung"
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "entry_not_found": {
+      "message": "Kein geladener Parcello-Eintrag gefunden."
+    },
+    "entry_required": {
+      "message": "Es sind mehrere Parcello-Konten eingerichtet. Wähle eines über config_entry_id aus."
+    },
+    "invalid_auth": {
+      "message": "Parcello hat die Anmeldung abgelehnt. Melde dich erneut an."
+    },
+    "api_error": {
+      "message": "Fehler bei der Kommunikation mit Parcello: {error}"
+    },
+    "update_failed": {
+      "message": "Die Sendungen konnten nicht aktualisiert werden: {error}"
+    },
+    "already_tracked": {
+      "message": "Die Sendung {tracking_id} wird bereits verfolgt."
+    },
+    "parcel_not_found": {
+      "message": "Keine Sendung mit der Sendungsnummer {tracking_id} gefunden."
+    }
+  },
+  "services": {
+    "add_parcel": {
+      "name": "Sendung hinzufügen",
+      "description": "Fügt dem Parcello-Konto eine Sendung hinzu. Gibt die ID der neuen Sendung und den Paketdienst zurück.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Konto",
+          "description": "Nur nötig, wenn mehrere Konten eingerichtet sind."
+        },
+        "tracking_id": {
+          "name": "Sendungsnummer",
+          "description": "Sendungsnummer des Pakets."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name der Sendung. Standard ist die Sendungsnummer."
+        },
+        "carrier": {
+          "name": "Paketdienst",
+          "description": "Paketdienst der Sendung. Leer lassen, damit Parcello ihn erkennt."
+        }
+      }
+    },
+    "remove_parcel": {
+      "name": "Sendung entfernen",
+      "description": "Löscht eine Sendung aus dem Parcello-Konto.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Konto",
+          "description": "Optional, sonst alle Konten."
+        },
+        "tracking_id": {
+          "name": "Sendungsnummer",
+          "description": "Sendungsnummer des Pakets."
+        }
+      }
+    }
+  }
 }

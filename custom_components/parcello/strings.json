@@ -1,35 +1,212 @@
 {
-    "config": {
-        "abort": {
-            "single_instance_allowed": "Es ist nur eine einzige Konfiguration von Mail und Paketen zulässig."
-        },
-        "error": {
-            "auth": "Das hat leider nicht funktioniert."
-        },
-        "step": {
-            "user": {
-                "data": {
-                    "password": "Passwort",
-                    "username": "Nutzername/Email"
-                },
-                "description": "Bitte geben Sie die Anmeldedaten Ihres Parcello-Kontos ein.",
-                "title": "Parcello"
-            }
+  "config": {
+    "step": {
+      "user": {
+        "title": "Set up Parcello",
+        "description": "Log in with the email address and password of your Parcello account. Logins with Apple or Facebook are not supported.",
+        "data": {
+          "email": "Email",
+          "password": "Password"
         }
+      },
+      "reauth_confirm": {
+        "title": "Log in to Parcello again",
+        "description": "Parcello rejected the login of {email}. Enter the password again.",
+        "data": {
+          "password": "Password"
+        }
+      }
     },
-    "options": {
-        "error": {
-            "auth": "Das hat leider nicht funktioniert."
-        },
-        "step": {
-            "init": {
-                "data": {
-                    "password": "Passwort",
-                    "username": "Nutzername/Email"
-                },
-                "description": "Bitte geben Sie die Anmeldedaten Ihres Parcello-Kontos ein.",
-                "title": "Parcello"
-            }
-        }
+    "error": {
+      "invalid_auth": "Wrong email address or password.",
+      "cannot_connect": "Parcello could not be reached. Try again later."
+    },
+    "abort": {
+      "already_configured": "This Parcello account is already set up.",
+      "reauth_successful": "Logged in again.",
+      "wrong_account": "This is a different Parcello account."
     }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Parcello options",
+        "data": {
+          "scan_interval": "Update interval",
+          "delivered_days": "Keep delivered parcels"
+        },
+        "data_description": {
+          "scan_interval": "Minutes between two updates. Parcello tracks the parcels at the carriers on its own, so a short interval does not make the data more current.",
+          "delivered_days": "Days a delivered parcel keeps its sensor after the last tracking event (0 = remove it right away). The parcel stays in the Parcello app until you delete it there."
+        }
+      }
+    }
+  },
+  "entity": {
+    "calendar": {
+      "deliveries": {
+        "name": "Deliveries"
+      }
+    },
+    "sensor": {
+      "expected_parcels": {
+        "name": "Expected parcels",
+        "unit_of_measurement": "parcels",
+        "state_attributes": {
+          "parcels": {
+            "name": "Parcels"
+          }
+        }
+      },
+      "out_for_delivery": {
+        "name": "Out for delivery",
+        "unit_of_measurement": "parcels",
+        "state_attributes": {
+          "parcels": {
+            "name": "Parcels"
+          }
+        }
+      },
+      "next_delivery": {
+        "name": "Next delivery",
+        "state_attributes": {
+          "name": {
+            "name": "Name"
+          },
+          "tracking_id": {
+            "name": "Tracking number"
+          },
+          "carrier": {
+            "name": "Carrier"
+          },
+          "status": {
+            "name": "Status"
+          },
+          "delivery_start": {
+            "name": "Delivery from"
+          },
+          "delivery_end": {
+            "name": "Delivery until"
+          }
+        }
+      },
+      "parcel": {
+        "name": "Parcel",
+        "state": {
+          "delivered": "Delivered",
+          "in_transit": "In transit",
+          "out_for_delivery": "Out for delivery",
+          "warning": "Delayed",
+          "problem": "Problem",
+          "loading": "Updating",
+          "missing_info": "Information missing",
+          "no_address": "Address missing",
+          "no_data_yet": "No data yet",
+          "returned": "Returned"
+        },
+        "state_attributes": {
+          "parcel_id": {
+            "name": "Parcel ID"
+          },
+          "tracking_id": {
+            "name": "Tracking number"
+          },
+          "carrier": {
+            "name": "Carrier"
+          },
+          "outgoing": {
+            "name": "Outgoing"
+          },
+          "pickup": {
+            "name": "Pickup"
+          },
+          "rescheduled": {
+            "name": "Rescheduled"
+          },
+          "delivery_start": {
+            "name": "Delivery from"
+          },
+          "delivery_end": {
+            "name": "Delivery until"
+          },
+          "last_event": {
+            "name": "Last event"
+          },
+          "last_event_time": {
+            "name": "Last event at"
+          },
+          "last_event_location": {
+            "name": "Location of the last event"
+          },
+          "last_event_code": {
+            "name": "Code of the last event"
+          },
+          "tracking_url": {
+            "name": "Tracking URL"
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "entry_not_found": {
+      "message": "No loaded Parcello entry found."
+    },
+    "entry_required": {
+      "message": "Several Parcello accounts are set up. Select one with config_entry_id."
+    },
+    "invalid_auth": {
+      "message": "Parcello rejected the login. Log in again."
+    },
+    "api_error": {
+      "message": "Error communicating with Parcello: {error}"
+    },
+    "update_failed": {
+      "message": "Updating the parcels failed: {error}"
+    },
+    "already_tracked": {
+      "message": "The parcel {tracking_id} is already tracked."
+    },
+    "parcel_not_found": {
+      "message": "No parcel with the tracking number {tracking_id} found."
+    }
+  },
+  "services": {
+    "add_parcel": {
+      "name": "Add parcel",
+      "description": "Adds a parcel to the Parcello account. Returns the ID of the new parcel and the carrier.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Account",
+          "description": "Only needed if several accounts are set up."
+        },
+        "tracking_id": {
+          "name": "Tracking number",
+          "description": "Tracking number of the parcel."
+        },
+        "name": {
+          "name": "Name",
+          "description": "Name of the parcel. Defaults to the tracking number."
+        },
+        "carrier": {
+          "name": "Carrier",
+          "description": "Carrier of the parcel. Detected by Parcello if empty."
+        }
+      }
+    },
+    "remove_parcel": {
+      "name": "Remove parcel",
+      "description": "Deletes a parcel from the Parcello account.",
+      "fields": {
+        "config_entry_id": {
+          "name": "Account",
+          "description": "Optional, otherwise all accounts."
+        },
+        "tracking_id": {
+          "name": "Tracking number",
+          "description": "Tracking number of the parcel."
+        }
+      }
+    }
+  }
 }

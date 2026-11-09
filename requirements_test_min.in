@@ -1,0 +1,7 @@
+# Test dependencies for the oldest supported Home Assistant release, the
+# "homeassistant" version in hacs.json. Regenerate the lock file with
+# scripts/lock_min (Python 3.12).
+pytest-homeassistant-custom-component==0.13.190
+# Newer pycares releases start a shutdown thread which the test plugin of
+# this release reports as a leftover thread.
+pycares==4.5.0

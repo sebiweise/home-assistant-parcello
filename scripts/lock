@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Regenerate requirements_test.txt (with hashes) from requirements_test.in.
+# Must run with the Python version used in CI (3.14).
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+python3 -m pip install --quiet pip-tools
+pip-compile --quiet --generate-hashes --allow-unsafe --strip-extras \
+  --no-emit-index-url --output-file=requirements_test.txt requirements_test.in

@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# Install the locked development and test dependencies.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+python3 -m pip install --upgrade pip
+# Wheels only, hash-checked. mock-open and pyric are published as source
+# distributions only, so they are the sole exceptions.
+python3 -m pip install --only-binary :all: --no-binary mock-open,pyric \
+  --require-hashes --no-deps -r requirements_test.txt
