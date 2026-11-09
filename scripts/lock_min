@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# Regenerate requirements_test_min.txt (with hashes) from
+# requirements_test_min.in for the oldest supported Home Assistant release.
+# Must run with the Python version of the "tests-min" CI job (3.12).
+# The package constraints of that Home Assistant release keep the other
+# dependencies at versions which worked with it.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+ha_version="$(python3 -c 'import json; print(json.load(open("hacs.json"))["homeassistant"])')"
+tmp="$(mktemp -d)"
+trap 'rm -rf "$tmp"' EXIT
+
+python3 -m pip install --quiet pip-tools
+python3 -m pip download --quiet --no-deps --only-binary :all: \
+  --dest "$tmp" "homeassistant==$ha_version"
+python3 - "$tmp" <<'EOF'
+import pathlib
+import sys
+import zipfile
+
+tmp = pathlib.Path(sys.argv[1])
+wheel = next(tmp.glob("homeassistant-*.whl"))
+with zipfile.ZipFile(wheel) as archive:
+    data = archive.read("homeassistant/package_constraints.txt")
+(tmp / "constraints.txt").write_bytes(data)
+EOF
+
+pip-compile --quiet --generate-hashes --allow-unsafe --strip-extras \
+  --no-emit-index-url --constraint "$tmp/constraints.txt" \
+  --output-file=requirements_test_min.txt requirements_test_min.in
+# Keep the temporary path out of the header.
+sed -i "s#$tmp/constraints.txt#homeassistant-$ha_version/package_constraints.txt#" \
+  requirements_test_min.txt

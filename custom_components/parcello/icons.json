@@ -1,0 +1,31 @@
+{
+  "entity": {
+    "calendar": {
+      "deliveries": { "default": "mdi:calendar-clock" }
+    },
+    "sensor": {
+      "expected_parcels": { "default": "mdi:package-variant-closed" },
+      "out_for_delivery": { "default": "mdi:truck-delivery" },
+      "next_delivery": { "default": "mdi:clock-outline" },
+      "parcel": {
+        "default": "mdi:package-variant-closed",
+        "state": {
+          "delivered": "mdi:package-variant-closed-check",
+          "in_transit": "mdi:truck-fast",
+          "out_for_delivery": "mdi:truck-delivery",
+          "warning": "mdi:package-variant-closed-remove",
+          "problem": "mdi:alert-circle",
+          "loading": "mdi:progress-clock",
+          "missing_info": "mdi:help-circle",
+          "no_address": "mdi:map-marker-question",
+          "no_data_yet": "mdi:timer-sand",
+          "returned": "mdi:keyboard-return"
+        }
+      }
+    }
+  },
+  "services": {
+    "add_parcel": { "service": "mdi:package-variant-closed-plus" },
+    "remove_parcel": { "service": "mdi:package-variant-closed-minus" }
+  }
+}

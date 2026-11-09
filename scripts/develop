@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# Start a local Home Assistant instance with this integration loaded.
+set -euo pipefail
+
+cd "$(dirname "$0")/.."
+
+mkdir -p config
+if [[ ! -e config/custom_components ]]; then
+  ln -s ../custom_components config/custom_components
+fi
+
+exec hass --config "${PWD}/config" --debug

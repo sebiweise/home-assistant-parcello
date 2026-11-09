@@ -1,0 +1,61 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+  schedule:
+    - cron: "0 0 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  hassfest:
+    name: Hassfest
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: home-assistant/actions/hassfest@86d4564712fa02543c808e3a693dd04f9d3f8361 # master
+
+  hacs:
+    name: HACS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: hacs/action@1ebf01c408f29afcb6406bd431bc98fd8cbb15aa # main
+        with:
+          category: integration
+
+  tests:
+    name: Tests & lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.14"
+      # Same commands as locally (single source of truth); setup-python
+      # puts its interpreter first on PATH as python3.
+      - name: Install locked dependencies
+        run: scripts/setup
+      - name: Lint and test
+        run: scripts/test
+
+  tests-min:
+    # The oldest Home Assistant release in hacs.json, see scripts/lock_min.
+    name: Tests (minimum Home Assistant version)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+        with:
+          python-version: "3.12"
+      - name: Install locked dependencies
+        # Wheels only, hash-checked; these older releases have no wheel.
+        run: |
+          python -m pip install --only-binary :all: \
+            --no-binary mock-open,pyric,fnvhash,paho-mqtt \
+            --require-hashes --no-deps -r requirements_test_min.txt
+      - run: pytest -q

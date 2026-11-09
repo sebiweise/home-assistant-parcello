@@ -1,0 +1,53 @@
+add_parcel:
+  fields:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: parcello
+    tracking_id:
+      required: true
+      example: "00340434161094042557"
+      selector:
+        text:
+    name:
+      required: false
+      example: "Neue Schuhe"
+      selector:
+        text:
+    carrier:
+      required: false
+      example: DHL
+      selector:
+        select:
+          custom_value: true
+          options:
+            - DHL
+            - Hermes
+            - UPS
+            - GLS
+            - DPD
+            - USPS
+            - FEDEX
+            - POSTAT
+            - TNT
+            - AMAZON
+            - CORREOS
+            - POSTCH
+            - YUNEXPRESS
+            - JTEXPRESS
+            - 4PX
+            - IMILE
+            - CAINIAO
+remove_parcel:
+  fields:
+    config_entry_id:
+      required: false
+      selector:
+        config_entry:
+          integration: parcello
+    tracking_id:
+      required: true
+      example: "00340434161094042557"
+      selector:
+        text:

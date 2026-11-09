@@ -1,0 +1,118 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration for the Parcello Home Assistant integration.
+language: de-DE
+tone_instructions: >-
+  Sachlich und knapp auf Deutsch. Die Parcello-Schnittstelle ist nicht
+  dokumentiert: Annahmen über Antworten und Felder immer zuerst und deutlich
+  hinterfragen.
+early_access: false
+
+reviews:
+  profile: chill
+  request_changes_workflow: false
+  high_level_summary: true
+  review_status: true
+  poem: false
+  collapse_walkthrough: true
+  sequence_diagrams: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches:
+      - master
+    ignore_usernames:
+      - dependabot[bot]
+
+  path_filters:
+    - "!requirements_test.txt"
+    - "!requirements_test_min.txt"
+    - "!graphify-out/**"
+    - "!custom_components/parcello/brand/**"
+
+  path_instructions:
+    - path: "custom_components/parcello/**/*.py"
+      instructions: >-
+        Home-Assistant-Custom-Integration (HACS, min. HA 2024.12.0). Prüfe
+        HA-Konventionen: async-only, kein blockierendes I/O im Event-Loop,
+        Typannotationen, Entitäten über die Basis in entity.py, Optionen in
+        entry.options, Token und Benutzer-ID in entry.data, nie das
+        Passwort. Lint und Format übernimmt Ruff (pyproject.toml),
+        Sicherheitsfunde meldet der Security-Scan: diese nicht wiederholen.
+        Unvollständige oder unerwartete Antworten der API dürfen das Update
+        nie abbrechen lassen, solange sich der Rest auswerten lässt.
+        `# NOSONAR` an von HA vorgegebenen Signaturen ist gewollt.
+    - path: "custom_components/parcello/api.py"
+      instructions: >-
+        Client für die nicht dokumentierte Schnittstelle der Parcello-App.
+        Endpunkte und Felder stammen aus der Web-App; Annahmen sollen im
+        Code als solche markiert sein. Token, Passwort und E-Mail-Adresse
+        dürfen nie geloggt werden oder in Fehlermeldungen, Attributen oder
+        Events auftauchen.
+    - path: "custom_components/parcello/coordinator.py"
+      instructions: >-
+        Polling, Einzelabfrage noch nicht verfolgter Sendungen und Events
+        bei Statusänderungen. Prüfe, dass ein abgelehnter Token den
+        Reauth-Flow startet und dass beim Start keine Events für bereits
+        bekannte Sendungen ausgelöst werden.
+    - path: "custom_components/parcello/sensor.py"
+      instructions: >-
+        Sensoren je Sendung werden dynamisch angelegt und entfernt. Prüfe,
+        dass Entitäten gelöschter oder abgelaufener Sendungen auch nach
+        einem Neustart aus der Entity Registry verschwinden.
+    - path: "custom_components/parcello/{strings.json,translations/*.json,services.yaml}"
+      instructions: >-
+        Neue Optionen, Entitäten und Services müssen in strings.json,
+        translations/en.json und translations/de.json konsistent sein und
+        in der README (Deutsch) dokumentiert werden. Deutsche Texte in
+        korrekter Rechtschreibung und neutraler Ansprache wie im Bestand.
+    - path: "custom_components/parcello/manifest.json"
+      instructions: >-
+        Version nach SemVer: Patch für Fixes, Logging/Diagnose und interne
+        Änderungen, Minor nur für neue Nutzerfunktionen, Major für Breaking
+        Changes. Nach dem Merge taggt release.yml automatisch.
+    - path: "tests/**/*.py"
+      instructions: >-
+        pytest mit pytest-homeassistant-custom-component. Neue Funktionen
+        brauchen Tests, besonders für unvollständige oder unerwartete
+        API-Antworten. Keine Tests überspringen oder abschwächen.
+        Zeitabhängiges über freezer bzw. async_fire_time_changed, nicht über
+        echtes Warten. HTTP nur über aioclient_mock, nie echte Anfragen.
+    - path: ".github/workflows/**"
+      instructions: >-
+        Actions sind per Commit-SHA gepinnt (Dependabot aktualisiert sie);
+        neue Actions ebenfalls per SHA mit Versionskommentar pinnen und
+        minimale permissions setzen.
+    - path: "README.md"
+      instructions: >-
+        README ist auf Deutsch und richtet sich an Endnutzer, nicht an
+        Entwickler. Auf Verständlichkeit achten.
+
+  tools:
+    ruff:
+      enabled: true
+    pylint:
+      enabled: false
+    flake8:
+      enabled: false
+    yamllint:
+      enabled: true
+    actionlint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: false
+    gitleaks:
+      enabled: true
+
+chat:
+  auto_reply: true
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "CLAUDE.md"
+  learnings:
+    scope: local
