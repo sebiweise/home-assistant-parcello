@@ -5,8 +5,9 @@ on:
     branches:
       - master
   pull_request:
+  # Weekly: catches new Home Assistant releases breaking the integration
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "17 3 * * 1"
   workflow_dispatch:
 
 permissions:
