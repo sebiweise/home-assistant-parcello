@@ -5,6 +5,7 @@
 [![hacs_badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories)
 [![Validate](https://github.com/sebiweise/home-assistant-parcello/actions/workflows/validate.yml/badge.svg)](https://github.com/sebiweise/home-assistant-parcello/actions/workflows/validate.yml)
 [![Security](https://github.com/sebiweise/home-assistant-parcello/actions/workflows/security.yml/badge.svg)](https://github.com/sebiweise/home-assistant-parcello/actions/workflows/security.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=sebiweise_home-assistant-parcello&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=sebiweise_home-assistant-parcello)
 [![GitHub Release](https://img.shields.io/github/v/release/sebiweise/home-assistant-parcello)](https://github.com/sebiweise/home-assistant-parcello/releases)
 
 Eine Home-Assistant-Integration für die Sendungsverfolgung von [Parcello](https://www.parcello.org). Parcello verfolgt
