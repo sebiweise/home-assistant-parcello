@@ -95,7 +95,7 @@ Für erwartete Sendungen zählen alle Status außer `delivered` und `returned`; 
 
 ### `parcello.add_parcel`
 
-Fügt dem Parcello-Konto eine Sendung hinzu. Ohne `carrier` erkennt Parcello den Paketdienst anhand der Sendungsnummer.
+Fügt dem Parcello-Konto eine Sendung hinzu. Ohne `carrier` erkennt Parcello den Paketdienst anhand der Sendungsnummer. Wie in der App bekommt die Sendung die Standard-Lieferadresse des Kontos (die als Favorit markierte eigene Adresse). Ist im Konto keine hinterlegt, zeigt Parcello die Sendung mit dem Status `no_address` an.
 
 ```yaml
 action: parcello.add_parcel

@@ -12,6 +12,8 @@ endpoints and fields are taken from the web app and are not documented:
     GET  /user/<id>/parcel/<parcel id>?token=<apiKey>&lang=de
         -> one parcel, tracked again at the carrier
     POST /user/<id>/add/parcel?token=<apiKey>   (409: already tracked)
+    GET  /user/<id>/addresses?token=<apiKey>
+        -> list of addresses; the default one has "isFavourite"
     DELETE /user/<id>/parcel/<parcel id>/delete?token=<apiKey>
     GET  /info/identifyTracking/<base64(tracking id)>
         -> {"carrier": "DHL", "confidence": 0.9, ...}
@@ -356,13 +358,37 @@ class ParcelloApiClient:
         )
         return _str(data.get("carrier")) if isinstance(data, Mapping) else None
 
+    async def async_get_default_address(self) -> dict[str, Any] | None:
+        """Return the default delivery address of the account, if any.
+
+        Like the app: the own address marked as favourite ("is_own" is a
+        bool or 0/1).
+        """
+        data = await self._get(f"/user/{self._user_id}/addresses")
+        if not isinstance(data, list):
+            return None
+        for address in data:
+            if (
+                isinstance(address, Mapping)
+                and address.get("isFavourite")
+                and address.get("is_own") in (True, 1)
+            ):
+                return dict(address)
+        return None
+
     async def async_add_parcel(
-        self, tracking_id: str, name: str | None, carrier: str | None
+        self,
+        tracking_id: str,
+        name: str | None,
+        carrier: str | None,
+        address: Mapping[str, Any] | None = None,
     ) -> str:
         """Add a parcel to the account and return its ID.
 
         The parcel is built like the app does; the server tracks it once it
-        is requested on its own (async_get_parcel).
+        is requested on its own (async_get_parcel). Without a delivery
+        address ("assigned_address", sent as an object) the server sets the
+        parcel to "no address".
         """
         parcel_id = f"{self._user_id}_p{int(time.time() * 1000)}"
         parcel = {
@@ -384,6 +410,7 @@ class ParcelloApiClient:
             "verlauf": [],
             "path": [],
             "survey": None,
+            "assigned_address": dict(address) if address else None,
         }
         await self._request(
             "POST",
