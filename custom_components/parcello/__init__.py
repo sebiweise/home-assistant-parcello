@@ -153,8 +153,11 @@ def _async_register_services(hass: HomeAssistant) -> None:
             carrier = call.data.get(ATTR_CARRIER) or (
                 await client.async_identify_carrier(tracking_id)
             )
+            # The app assigns the default address to new parcels; without
+            # it the server marks the parcel as "no address".
+            address = await client.async_get_default_address()
             parcel_id = await client.async_add_parcel(
-                tracking_id, call.data.get(ATTR_NAME), carrier
+                tracking_id, call.data.get(ATTR_NAME), carrier, address
             )
             # Lets the server track the new parcel at the carrier.
             await client.async_get_parcel(parcel_id)
