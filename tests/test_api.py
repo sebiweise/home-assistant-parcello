@@ -209,6 +209,53 @@ async def test_add_parcel(
     assert body["newParcel"]["trackingid"] == "123"
     assert body["newParcel"]["name"] == "123"
     assert body["newParcel"]["carrier"] == "DHL"
+    assert body["newParcel"]["assigned_address"] is None
+
+
+async def test_add_parcel_with_address(
+    hass: HomeAssistant, aioclient_mock: AiohttpClientMocker
+) -> None:
+    """The delivery address is sent as an object."""
+    aioclient_mock.post(f"{API_URL}/user/{USER_ID}/add/parcel", json={})
+    client = ParcelloApiClient(async_get_clientsession(hass), USER_ID, TOKEN)
+    address = {"id": "u1_a1", "zip": 12345, "isFavourite": True, "is_own": True}
+    await client.async_add_parcel("123", "Schuhe", None, address)
+    body = aioclient_mock.mock_calls[0][2]
+    assert body["newParcel"]["assigned_address"] == address
+
+
+@pytest.mark.parametrize(
+    ("addresses", "expected"),
+    [
+        (
+            [
+                {"id": "a1", "isFavourite": False, "is_own": 1},
+                {"id": "a2", "isFavourite": True, "is_own": 1},
+            ],
+            "a2",
+        ),
+        ([{"id": "a1", "isFavourite": True, "is_own": True}], "a1"),
+        # A favourite address of someone else (outgoing parcels) is skipped.
+        ([{"id": "a1", "isFavourite": True, "is_own": 0}], None),
+        ([{"id": "a1", "isFavourite": False, "is_own": 1}], None),
+        ([], None),
+        (None, None),
+    ],
+)
+async def test_default_address(
+    hass: HomeAssistant,
+    aioclient_mock: AiohttpClientMocker,
+    addresses: list | None,
+    expected: str | None,
+) -> None:
+    """The default address is the own favourite address."""
+    aioclient_mock.get(
+        f"{API_URL}/user/{USER_ID}/addresses",
+        **({"text": ""} if addresses is None else {"json": addresses}),
+    )
+    client = ParcelloApiClient(async_get_clientsession(hass), USER_ID, TOKEN)
+    address = await client.async_get_default_address()
+    assert (address["id"] if address else None) == expected
 
 
 async def test_add_parcel_already_tracked(

@@ -174,7 +174,7 @@
   "services": {
     "add_parcel": {
       "name": "Add parcel",
-      "description": "Adds a parcel to the Parcello account. Returns the ID of the new parcel and the carrier.",
+      "description": "Adds a parcel to the Parcello account with the default delivery address of the account. Returns the ID of the new parcel and the carrier.",
       "fields": {
         "config_entry_id": {
           "name": "Account",

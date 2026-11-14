@@ -39,6 +39,11 @@ USER_ID = "u1"
 TOKEN = "token1"
 NOW = datetime.fromisoformat("2026-01-01T06:00:00+00:00")
 PARCELS_URL = f"{API_URL}/user/{USER_ID}/parcels-without-crawling"
+ADDRESSES_URL = f"{API_URL}/user/{USER_ID}/addresses"
+ADDRESSES = [
+    {"id": "u1_a1", "name": "Büro", "isFavourite": False, "is_own": 1},
+    {"id": "u1_a2", "name": "Zuhause", "isFavourite": True, "is_own": 1},
+]
 LOGIN_URL = (
     f"{API_URL}/login/mail/" + base64.b64encode(f"{EMAIL}:{PASSWORD}".encode()).decode()
 )
@@ -84,6 +89,7 @@ async def _setup(
     **options,
 ) -> MockConfigEntry:
     aioclient_mock.get(PARCELS_URL, json=[_parcel()] if parcels is None else parcels)
+    aioclient_mock.get(ADDRESSES_URL, json=ADDRESSES)
     entry = MockConfigEntry(
         domain=DOMAIN,
         title=EMAIL,
@@ -535,6 +541,9 @@ async def test_add_parcel(
     ]
     assert add_calls[0][2]["newParcel"]["trackingid"] == "123"
     assert add_calls[0][2]["newParcel"]["carrier"] == "UPS"
+    # The default address, as in the app (the server reports "no address"
+    # otherwise).
+    assert add_calls[0][2]["newParcel"]["assigned_address"] == ADDRESSES[1]
     assert any(
         call[1].path.endswith(result["parcel_id"]) for call in aioclient_mock.mock_calls
     )

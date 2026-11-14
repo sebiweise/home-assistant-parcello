@@ -174,7 +174,7 @@
   "services": {
     "add_parcel": {
       "name": "Sendung hinzufügen",
-      "description": "Fügt dem Parcello-Konto eine Sendung hinzu. Gibt die ID der neuen Sendung und den Paketdienst zurück.",
+      "description": "Fügt dem Parcello-Konto eine Sendung mit der Standard-Lieferadresse des Kontos hinzu. Gibt die ID der neuen Sendung und den Paketdienst zurück.",
       "fields": {
         "config_entry_id": {
           "name": "Konto",
