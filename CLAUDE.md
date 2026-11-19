@@ -48,7 +48,6 @@ Parcello app and web app (`api-v4.parcello.org/v1/app`), see `api.py`.
   and German translations in German.
 - The token, the password and the email address must never be logged or end
   up in attributes, events or error messages.
-- No `Co-Authored-By` lines in commit messages.
 
 ## graphify
 
