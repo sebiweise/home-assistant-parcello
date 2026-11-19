@@ -244,7 +244,7 @@ scripts/test
 Die Test-Abhängigkeiten sind in `requirements_test.txt` inklusive Hashes gesperrt und werden ausschließlich
 als Wheels installiert (`--only-binary :all: --require-hashes`). Ausnahmen sind nur `mock-open` und `pyric`,
 die ausschließlich als Quellpaket veröffentlicht werden. Dependabot aktualisiert sie wöchentlich,
-ebenso die per Commit-SHA gepinnten GitHub Actions und das Devcontainer-Image.
+ebenso die GitHub Actions (per Versions-Tag eingebunden) und das Devcontainer-Image.
 
 ## Lizenz
 
