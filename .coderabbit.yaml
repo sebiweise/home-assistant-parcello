@@ -80,8 +80,8 @@ reviews:
         echtes Warten. HTTP nur über aioclient_mock, nie echte Anfragen.
     - path: ".github/workflows/**"
       instructions: >-
-        Actions sind per Commit-SHA gepinnt (Dependabot aktualisiert sie);
-        neue Actions ebenfalls per SHA mit Versionskommentar pinnen und
+        Actions sind per Versions-Tag eingebunden (Dependabot aktualisiert
+        sie); neue Actions ebenfalls per Tag (`@vX`) einbinden und
         minimale permissions setzen.
     - path: "README.md"
       instructions: >-
