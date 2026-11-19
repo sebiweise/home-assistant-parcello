@@ -4,10 +4,14 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
     # Version updates wait a week: most hijacked releases are pulled within
     # days. Security updates are not delayed by this.
     cooldown:
       default-days: 7
+    labels: [dependencies]
     commit-message:
       prefix: "ci"
     groups:
@@ -24,10 +28,14 @@ updates:
       - requirements_test_min.txt
     schedule:
       interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
     cooldown:
       default-days: 7
+    labels: [dependencies]
     commit-message:
-      prefix: "deps"
+      prefix: "chore(deps)"
     groups:
       test-dependencies:
         patterns:
@@ -37,7 +45,11 @@ updates:
     directory: /
     schedule:
       interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: Europe/Berlin
     cooldown:
       default-days: 7
+    labels: [dependencies]
     commit-message:
-      prefix: "devcontainer"
+      prefix: "chore(devcontainer)"
